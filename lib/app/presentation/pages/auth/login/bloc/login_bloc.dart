@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indriver_app/app/domain/useCases/auth/auth_usecases.dart';
+import 'package:indriver_app/app/domain/utils/resource.dart';
 import 'package:indriver_app/app/presentation/pages/auth/login/bloc/login_event.dart';
 import 'package:indriver_app/app/presentation/pages/auth/login/bloc/login_state.dart';
 import 'package:indriver_app/app/presentation/utils/bloc_form_item.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  AuthUsecases authUsecases;
   final formKey = GlobalKey<FormState>();
 
-  LoginBloc() : super(const LoginState()) {
+  LoginBloc({required this.authUsecases}) : super(const LoginState()) {
     on<LoginInitEvent>(_initForm);
     on<EmailChanged>(_setEmail);
     on<PasswordChanged>(_setPassword);
@@ -46,8 +49,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     );
   }
 
-  void _formSubmit(FormSubmit event, Emitter<LoginState> emit) {
-    print('E-mail: ${state.email.value}');
-    print('Password: ${state.password.value}');
+  Future<void> _formSubmit(FormSubmit event, Emitter<LoginState> emit) async {
+    emit(state.copyWith(response: Loading(), formKey: formKey));
+
+    Resource response = await authUsecases.login.run(
+      email: state.email.value,
+      password: state.password.value,
+    );
+
+    emit(state.copyWith(response: response, formKey: formKey));
   }
 }

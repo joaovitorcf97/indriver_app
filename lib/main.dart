@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:indriver_app/app/presentation/pages/auth/login/login_page.dart';
 import 'package:indriver_app/app/presentation/pages/auth/register/register_page.dart';
 import 'package:indriver_app/bloc_provider.dart';
+import 'package:indriver_app/injection.dart';
 
-void main() {
+void main() async {
+  await configureDependencies();
   runApp(const MyApp());
 }
 
@@ -16,6 +19,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: blocProvider,
       child: MaterialApp(
+        builder: FToastBuilder(),
         debugShowCheckedModeBanner: false,
         title: 'InDriver App',
         theme: ThemeData(
