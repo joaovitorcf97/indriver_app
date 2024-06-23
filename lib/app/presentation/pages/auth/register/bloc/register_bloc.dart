@@ -1,13 +1,16 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:indriver_app/app/domain/useCases/auth/auth_usecases.dart';
+import 'package:indriver_app/app/domain/utils/resource.dart';
 import 'package:indriver_app/app/presentation/pages/auth/register/bloc/register_event.dart';
 import 'package:indriver_app/app/presentation/pages/auth/register/bloc/register_state.dart';
 import 'package:indriver_app/app/presentation/utils/bloc_form_item.dart';
 
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
+  AuthUsecases authUsecases;
   final formKey = GlobalKey<FormState>();
 
-  RegisterBloc() : super(const RegisterState()) {
+  RegisterBloc(this.authUsecases) : super(const RegisterState()) {
     on<RegisterInitEvent>(_initForm);
     on<NameChanged>(_setName);
     on<EmailChanged>(_setEmail);
@@ -106,13 +109,13 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     );
   }
 
-  void _formSubmit(FormSubmit event, Emitter<RegisterState> emit) {
-    print('Name ${state.name.value}');
-    print('E-mail ${state.email.value}');
-    print('Lastname ${state.lastname.value}');
-    print('Phone ${state.phone.value}');
-    print('Password ${state.password.value}');
-    print('Password Confirm ${state.confirmPassword.value}');
+  Future<void> _formSubmit(
+      FormSubmit event, Emitter<RegisterState> emit) async {
+    emit(state.copyWith(response: Loading(), formKey: formKey));
+
+    Resource response = await authUsecases.regiter.run(state.toUser());
+
+    emit(state.copyWith(response: response, formKey: formKey));
   }
 
   void _resetForm(FormReset event, Emitter<RegisterState> emit) {

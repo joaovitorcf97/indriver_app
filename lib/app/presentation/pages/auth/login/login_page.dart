@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:indriver_app/app/domain/model/auth_response.dart';
 import 'package:indriver_app/app/domain/utils/resource.dart';
 import 'package:indriver_app/app/presentation/pages/auth/login/bloc/login_bloc.dart';
+import 'package:indriver_app/app/presentation/pages/auth/login/bloc/login_event.dart';
 import 'package:indriver_app/app/presentation/pages/auth/login/bloc/login_state.dart';
 import 'package:indriver_app/app/presentation/pages/auth/login/login_content.dart';
 
@@ -23,9 +25,19 @@ class _LoginPageState extends State<LoginPage> {
 
           if (response is ErrorData) {
             Fluttertoast.showToast(
-                msg: response.message, toastLength: Toast.LENGTH_LONG);
+              msg: response.message,
+              toastLength: Toast.LENGTH_LONG,
+            );
           } else if (response is Success) {
-            print(' data: ${response.data}');
+            final authResponse = response.data as AuthResponse;
+            context.read<LoginBloc>().add(
+                  SaveUserSession(authResponse: authResponse),
+                );
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              'client/home',
+              (route) => false,
+            );
           }
         },
         child: BlocBuilder<LoginBloc, LoginState>(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:indriver_app/app/domain/model/auth_response.dart';
 import 'package:indriver_app/app/domain/useCases/auth/auth_usecases.dart';
 import 'package:indriver_app/app/domain/utils/resource.dart';
 import 'package:indriver_app/app/presentation/pages/auth/login/bloc/login_event.dart';
@@ -8,6 +9,7 @@ import 'package:indriver_app/app/presentation/utils/bloc_form_item.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   AuthUsecases authUsecases;
+
   final formKey = GlobalKey<FormState>();
 
   LoginBloc({required this.authUsecases}) : super(const LoginState()) {
@@ -15,10 +17,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<EmailChanged>(_setEmail);
     on<PasswordChanged>(_setPassword);
     on<FormSubmit>(_formSubmit);
+    on<SaveUserSession>(_saveUserSession);
   }
 
-  void _initForm(LoginInitEvent event, Emitter<LoginState> emit) {
+  Future<void> _initForm(LoginInitEvent event, Emitter<LoginState> emit) async {
+    AuthResponse? authResponse = await authUsecases.getUserSession.run();
+    print('Auth Response Session: ${authResponse?.toJson()}');
     emit(state.copyWith(formKey: formKey));
+
+    if (authResponse != null) {
+      emit(state.copyWith(
+        response: Success(data: authResponse),
+        formKey: formKey,
+      ));
+    }
   }
 
   void _setEmail(EmailChanged event, Emitter<LoginState> emit) {
@@ -47,6 +59,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         formKey: formKey,
       ),
     );
+  }
+
+  Future<void> _saveUserSession(
+    SaveUserSession event,
+    Emitter<LoginState> emit,
+  ) async {
+    await authUsecases.saveUserSession.run(event.authResponse);
   }
 
   Future<void> _formSubmit(FormSubmit event, Emitter<LoginState> emit) async {

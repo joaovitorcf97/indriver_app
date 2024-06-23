@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:indriver_app/app/domain/model/user.dart';
+import 'package:indriver_app/app/domain/utils/resource.dart';
 import 'package:indriver_app/app/presentation/utils/bloc_form_item.dart';
 
 class RegisterState extends Equatable {
@@ -11,6 +13,15 @@ class RegisterState extends Equatable {
   final BlocFormItem password;
   final BlocFormItem confirmPassword;
   final GlobalKey<FormState>? formKey;
+  final Resource? response;
+
+  toUser() => User(
+        name: name.value,
+        lastname: lastname.value,
+        email: email.value,
+        phone: phone.value,
+        password: password.value,
+      );
 
   const RegisterState({
     this.name = const BlocFormItem(error: 'Enter name'),
@@ -20,6 +31,7 @@ class RegisterState extends Equatable {
     this.password = const BlocFormItem(error: 'Enter password'),
     this.confirmPassword = const BlocFormItem(error: 'Enter confirm password'),
     this.formKey,
+    this.response,
   });
 
   RegisterState copyWith({
@@ -30,6 +42,7 @@ class RegisterState extends Equatable {
     BlocFormItem? password,
     BlocFormItem? confirmPassword,
     GlobalKey<FormState>? formKey,
+    Resource? response,
   }) {
     return RegisterState(
       name: name ?? this.name,
@@ -39,6 +52,7 @@ class RegisterState extends Equatable {
       password: password ?? this.password,
       confirmPassword: confirmPassword ?? this.confirmPassword,
       formKey: formKey ?? this.formKey,
+      response: response ?? this.response,
     );
   }
 
@@ -50,5 +64,6 @@ class RegisterState extends Equatable {
         phone,
         password,
         confirmPassword,
+        response,
       ];
 }
